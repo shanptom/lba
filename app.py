@@ -370,21 +370,29 @@ else:
     
     st.markdown("### 📝 Example Protocol Format")
     st.code("""
-PCR Amplification Protocol:
+## DNA Extraction Protocol
+**Step 1: Tissue Homogenization**
+- Weigh 100 mg of fresh Arabidopsis leaves and place in a 2 mL microcentrifuge tube.
+- Add 500 µL of Lysis Buffer(CTAB-based, containing 2% CTAB, 100 mM Tris-HCl, 20 mM EDTA, 1.4 M NaCl) and 10 µL of RNase A (10 mg/mL).
+- Vortex vigorously for 30 sec until the tissue is fully disrupted.
 
-Materials needed:
-- 10x PCR buffer (High Fidelity)
-- dNTP mix (10 mM each)
-- Forward primer (10 μM)
-- Reverse primer (10 μM) 
-- Taq polymerase (5 U/μL)
-- 0.2 mL PCR tubes
-- Nuclease-free water
+**Step 2: Incubation & Protein Removal**
+- Incubate the mixture at 65°C for 10 min in a water bath.
+- Add 500 µL of Chloroform:Isoamyl Alcohol (24:1) and mix by inversion for 5 min.
+- Centrifuge at 12,000 × *g* for 5 min. Transfer the aqueous (top) phase to a new tube.
 
-Procedure:
-1. Prepare master mix in 1.5 mL microcentrifuge tube
-2. Add 2 μL template DNA to each 0.2 mL PCR tube
-3. Run thermocycling program...
+**Step 3: DNA Precipitation**
+- Add 0.7 volumes of Isopropanol and mix gently. Incubate at -20°C for 30 min.
+- Centrifuge at 12,000 × *g* for 10 min to pellet DNA. Discard the supernatant.
+
+**Step 4: Washing & Elution**
+- Wash the pellet with 500 µL of 70% Ethanol, then centrifuge at 12,000 × *g* for 2 min. Air-dry for 5 min.
+- Resuspend the DNA in 50 µL of Elution Buffer (10 mM Tris-HCl, pH 8.5) and transfer to a DNA spin column.
+- Centrifuge at 12,000 × *g* for 1 min to collect purified DNA.
+
+**Step 5: Quantification**
+- Measure DNA concentration using a Nanodrop Spectrophotometer at 260 nm.
+- Store DNA at -20°C for long-term use.
     """, language="text")
 
 # Sidebar
