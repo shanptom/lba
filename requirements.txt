@@ -1,0 +1,5 @@
+streamlit
+anthropic
+bs4
+pandas
+beautifulsoup4
