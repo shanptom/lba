@@ -44,7 +44,7 @@
 ## 📦 Installation (Local)
 
 ```bash
-git clone https://github.com/yourusername/protocart.git
+git clone https://github.com/shanptom/lba.git
 cd protocart
 pip install -r requirements.txt
 streamlit run app.py
