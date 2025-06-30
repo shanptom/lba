@@ -3,7 +3,7 @@
 
 
 
-**ProtoCart** helps researchers turn lab protocols into actionable shopping lists. Upload your protocol, and the app will extract reagents, consumables, and small tools, then return direct product links from vendors like FisherSci, Sigma-Aldrich, and ThermoFisher.  
+**ProtoCart** helps researchers identify materials mentioned in lab protocols and organize them into a smart shopping list. Upload your protocol, and the app will extract reagents and consumables, then find direct product links from vendors like FisherSci, Sigma-Aldrich, and ThermoFisher..  
 
 [![Streamlit App](https://img.shields.io/badge/Launch_App-Protocart-brightgreen?style=for-the-badge&logo=streamlit)](https://protocart.streamlit.app/)
 ---
