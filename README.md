@@ -1,28 +1,24 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-# 🧪 Protocart — Protocol-to-Shopping List Agent
+# 🧪 ProtoCart — Protocol-to-Shopping List Agent
 
 
 
-**Protocart** helps researchers turn lab protocols into actionable shopping lists. Upload your protocol, and the app will extract reagents, consumables, and small tools, then return direct product links from vendors like FisherSci, Sigma-Aldrich, and ThermoFisher.  
+**ProtoCart** helps researchers turn lab protocols into actionable shopping lists. Upload your protocol, and the app will extract reagents, consumables, and small tools, then return direct product links from vendors like FisherSci, Sigma-Aldrich, and ThermoFisher.  
 
 [![Streamlit App](https://img.shields.io/badge/Launch_App-Protocart-brightgreen?style=for-the-badge&logo=streamlit)](https://protocart.streamlit.app/)
 ---
 
 ## 🚀 Features
 
-- 🧠 **AI-powered parsing** using Anthropic Claude
-- 🛒 **Direct product links** from top lab vendors
-- 📦 **Shopping checklist** with tracking and export to CSV
-- 🔎 **Custom search** using catalog hints and specifications
-- 💡 **Support for multiple vendors**: FisherSci, Sigma-Aldrich, ThermoFisher
-- 📄 Example protocols and user guidance included
+-  **AI-powered parsing** using Anthropic Claude
+-  **Direct product links** from top lab vendors
+-  **Shopping checklist** with tracking and export to CSV
+-  **Custom search** using catalog hints and specifications
+-  **Support for multiple vendors**: FisherSci, Sigma-Aldrich, ThermoFisher
+-  Example protocols and user guidance included
 
 ---
-
-## 🖼️ Screenshot
-
-![screenshot](/assets/screenshot.png) <!-- replace with actual path if needed -->
-
+![](assets/Screenshot.png)
 ---
 
 ## 📂 How to Use
@@ -45,16 +41,6 @@
 
 ---
 
-## 🔒 Secrets (Required for Deployment)
-
-Use `streamlit secrets` to provide your Claude API key:
-
-[secrets.toml]
-
-ANTHROPIC_API_KEY = "your_claude_api_key"
-
----
-
 ## 📦 Installation (Local)
 
 ```bash
@@ -62,5 +48,18 @@ git clone https://github.com/yourusername/protocart.git
 cd protocart
 pip install -r requirements.txt
 streamlit run app.py
-📜 License
-This project is licensed under the MIT License.
+```
+---
+## Adding Claude API
+
+To use Claude, create a file named .streamlit/secrets.toml and add your API key:
+Create `.streamlit/secrets.toml` then add api key as follows in `secrets.toml` file.
+
+```
+ANTHROPIC_API_KEY = "your_claude_api_key"
+```
+⚠️ Do not commit this file to GitHub.
+
+---
+## 📜 License
+This project is licensed under the MIT License. 
