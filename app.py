@@ -22,7 +22,7 @@ client = anthropic.Anthropic(
 )
 
 st.set_page_config(page_title="Lab Protocol Shopper", layout="wide")
-st.title("🧪 Protocol-to-Shopping List Agent")
+st.title("🧪 ProtoCart")
 st.markdown("*Automatically extract materials from your protocol and find direct product links for easy purchasing*")
 
 uploaded_file = st.file_uploader("Upload your lab protocol (TXT format preferred)", type=["txt"])
