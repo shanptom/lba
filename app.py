@@ -292,7 +292,7 @@ if uploaded_file:
     
     # Extract materials (only if not already done)
     if st.session_state.extracted_materials is None:
-        with st.spinner("🤖 Analyzing protocol with Claude..."):
+        with st.spinner("Finding Reagents/Consumables..."):
             materials = get_chemicals_from_protocol(protocol_text)
             st.session_state.extracted_materials = materials
     else:
@@ -365,7 +365,7 @@ else:
     
     with col2:
         st.markdown("**2. AI Extraction**")
-        st.markdown("Claude identifies all materials to purchase")
+        st.markdown("AI identifies all materials to purchase")
     
     with col3:
         st.markdown("**3. Smart Shopping**")
