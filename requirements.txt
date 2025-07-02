@@ -1,5 +1,6 @@
 streamlit
-anthropic
-bs4
 pandas
 beautifulsoup4
+requests
+PyMuPDF
+google-generativeai

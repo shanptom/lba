@@ -1,5 +1,4 @@
 import streamlit as st
-import anthropic
 import pandas as pd
 import requests
 from urllib.parse import quote_plus
@@ -7,8 +6,21 @@ import time
 import re
 from bs4 import BeautifulSoup
 import json
+import fitz  # PyMuPDF for PDF reading
+import openai
+import google.generativeai as genai
 
-# Initialize session state
+# ==== CONFIGURATION ====
+USE_GOOGLE_DIRECT = True  # Set False to use OpenRouter
+
+# API Keys
+if USE_GOOGLE_DIRECT:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+else:
+    openai.api_key = st.secrets["OPENROUTER_API_KEY"]
+    openai.api_base = "https://openrouter.ai/api/v1"
+
+# ==== SESSION STATE ====
 if 'materials_with_links' not in st.session_state:
     st.session_state.materials_with_links = None
 if 'search_completed' not in st.session_state:
@@ -16,20 +28,11 @@ if 'search_completed' not in st.session_state:
 if 'extracted_materials' not in st.session_state:
     st.session_state.extracted_materials = None
 
-# Initialize Claude client
-client = anthropic.Anthropic(
-    api_key=st.secrets["ANTHROPIC_API_KEY"]
-)
-
 st.set_page_config(page_title="Lab Protocol Shopper", layout="wide")
-st.title("🧪 ProtoCart")
+st.title("📊 ProtoCart")
 st.markdown("*Automatically extract materials from your protocol and find direct product links for easy purchasing*")
 
-uploaded_file = st.file_uploader("Upload your lab protocol (TXT format preferred)", type=["txt"])
-
-@st.cache_data
-def extract_text(file):
-    return file.read().decode("utf-8")
+uploaded_file = st.file_uploader("Upload your lab protocol (TXT or PDF)", type=["txt", "pdf"])
 
 vendor_site = st.selectbox(
     "Select your preferred vendor:",
@@ -37,21 +40,33 @@ vendor_site = st.selectbox(
     help="Choose your preferred vendor for product links"
 )
 
+@st.cache_data
+def extract_text(file):
+    if file.type == "text/plain":
+        return file.read().decode("utf-8")
+    elif file.type == "application/pdf":
+        pdf_reader = fitz.open(stream=file.read(), filetype="pdf")
+        text = ""
+        for page in pdf_reader:
+            text += page.get_text()
+        return text
+    else:
+        st.error("Unsupported file type.")
+        return ""
+
 def get_product_links(query, vendor, max_results=3):
     """Attempt to get actual product links by parsing search results"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
-    
+
     try:
         if vendor == "fishersci.com":
             search_url = f"https://www.fishersci.com/us/en/catalog/search/products?keyword={quote_plus(query)}"
             response = requests.get(search_url, headers=headers, timeout=10)
-            
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 product_links = []
-                
                 links = soup.find_all('a', href=True)
                 for link in links:
                     href = link.get('href')
@@ -60,17 +75,14 @@ def get_product_links(query, vendor, max_results=3):
                         product_links.append(full_url)
                         if len(product_links) >= max_results:
                             break
-                
                 return product_links if product_links else [search_url]
-        
+
         elif vendor == "sigmaaldrich.com":
             search_url = f"https://www.sigmaaldrich.com/US/en/search/{quote_plus(query)}"
             response = requests.get(search_url, headers=headers, timeout=10)
-            
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 product_links = []
-                
                 links = soup.find_all('a', href=True)
                 for link in links:
                     href = link.get('href')
@@ -79,17 +91,14 @@ def get_product_links(query, vendor, max_results=3):
                         product_links.append(full_url)
                         if len(product_links) >= max_results:
                             break
-                
                 return product_links if product_links else [search_url]
-        
+
         elif vendor == "thermofisher.com":
             search_url = f"https://www.thermofisher.com/search/results?query={quote_plus(query)}"
             response = requests.get(search_url, headers=headers, timeout=10)
-            
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 product_links = []
-                
                 links = soup.find_all('a', href=True)
                 for link in links:
                     href = link.get('href')
@@ -98,19 +107,12 @@ def get_product_links(query, vendor, max_results=3):
                         product_links.append(full_url)
                         if len(product_links) >= max_results:
                             break
-                
                 return product_links if product_links else [search_url]
-        
+
     except Exception as e:
         print(f"Error fetching products for {query}: {e}")
-        # Fallback to search URL
-        if vendor == "fishersci.com":
-            return [f"https://www.fishersci.com/us/en/catalog/search/products?keyword={quote_plus(query)}"]
-        elif vendor == "sigmaaldrich.com":
-            return [f"https://www.sigmaaldrich.com/US/en/search/{quote_plus(query)}"]
-        elif vendor == "thermofisher.com":
-            return [f"https://www.thermofisher.com/search/results?query={quote_plus(query)}"]
-    
+        return [search_url]
+
     return ["Search failed"]
 
 def search_all_products(materials, vendor):
@@ -118,22 +120,20 @@ def search_all_products(materials, vendor):
     results = []
     progress_bar = st.progress(0)
     status_text = st.empty()
-    
+
     for i, material in enumerate(materials):
         status_text.text(f"Searching for: {material['name']}")
-        
-        # Get product links
         links = get_product_links(material['name'], vendor)
         material['product_links'] = links
         material['primary_link'] = links[0] if links else "Not found"
-        
         results.append(material)
         progress_bar.progress((i + 1) / len(materials))
-        time.sleep(0.5)  # Be respectful to servers
-    
+        time.sleep(0.5)
+
     progress_bar.empty()
     status_text.empty()
     return results
+
 
 def get_chemicals_from_protocol(text):
     system_prompt = """You are a laboratory purchasing assistant. Extract all materials that need to be purchased for this protocol.
@@ -160,29 +160,31 @@ def get_chemicals_from_protocol(text):
     ]
 
     Do not include basic lab equipment like pipettes, centrifuges, or items clearly already available."""
-    
+
     try:
-        message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=2000,
-            temperature=0,
-            system=system_prompt,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Extract purchasable materials from this protocol:\n\n{text}"
-                }
-            ]
-        )
-        
-        response_text = message.content[0].text.strip()
-        
-        # Clean JSON response
+        if USE_GOOGLE_DIRECT:
+            model = genai.GenerativeModel("gemini-2.0-flash")
+            response = model.generate_content(
+                f"{system_prompt}\n\nExtract purchasable materials from this protocol:\n\n{text}"
+)
+            response_text = response.text.strip()
+        else:
+            response = openai.ChatCompletion.create(
+                model="google/gemini-2.0-flash",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Extract purchasable materials from this protocol:\n\n{text}"}
+                ],
+                temperature=0,
+                max_tokens=2000
+            )
+            response_text = response.choices[0].message["content"].strip()
+
         if response_text.startswith("```json"):
             response_text = response_text.replace("```json", "").replace("```", "").strip()
         elif response_text.startswith("```"):
             response_text = response_text.replace("```", "").strip()
-        
+
         try:
             materials = json.loads(response_text)
             if isinstance(materials, list) and all(isinstance(item, dict) and 'name' in item for item in materials):
@@ -193,10 +195,11 @@ def get_chemicals_from_protocol(text):
         except json.JSONDecodeError as e:
             st.error(f"Could not parse materials list: {e}")
             return []
-                
+
     except Exception as e:
-        st.error(f"Error calling Claude API: {str(e)}")
+        st.error(f"Error calling Gemini model: {str(e)}")
         return []
+
 
 def create_shopping_interface(materials_with_links, vendor):
     """Create an interface that mimics the shopping experience"""
